@@ -1,6 +1,6 @@
 # LAT35++ v0.1
 
-質的研究のためのデータ分析ワークベンチ
+授業分析のためのコーディング＆分析ツール
 
 Developed by Masanobu Sakamoto
 
