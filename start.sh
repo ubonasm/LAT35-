@@ -13,7 +13,7 @@ fi
 
 URL="http://localhost:3000"
 echo "============================================"
-echo " Kotoba Lens is starting: $URL"
+echo " LAT35++ v0.1 is starting: $URL"
 echo " Press Ctrl+C to stop."
 echo "============================================"
 

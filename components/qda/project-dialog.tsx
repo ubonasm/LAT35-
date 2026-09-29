@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { useT } from '@/lib/i18n'
 import { useProjects } from '@/lib/qda/store'
 import type { Project } from '@/lib/qda/types'
 
@@ -26,6 +27,7 @@ export function ProjectDialog({ open, onOpenChange }: { open: boolean; onOpenCha
   const [desc, setDesc] = useState('')
   const [error, setError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const t = useT()
 
   const onImport = async (file: File) => {
     try {
@@ -37,7 +39,7 @@ export function ProjectDialog({ open, onOpenChange }: { open: boolean; onOpenCha
       setError(null)
       onOpenChange(false)
     } catch {
-      setError('プロジェクトファイル（.qda.json）を読み込めませんでした。')
+      setError(t('プロジェクトファイル（.qda.json）を読み込めませんでした。'))
     }
   }
 
@@ -45,15 +47,15 @@ export function ProjectDialog({ open, onOpenChange }: { open: boolean; onOpenCha
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>プロジェクト</DialogTitle>
+          <DialogTitle>{t('プロジェクト')}</DialogTitle>
           <DialogDescription>
-            作業内容はこのブラウザ内に自動保存されます。別のPCで続ける・他の人に渡すときは、書き出したプロジェクトファイル（.qda.json）を相手が「プロジェクトを読み込む」で開いてください。
+            {t('作業内容はこのブラウザ内に自動保存されます。別のPCで続ける・他の人に渡すときは、書き出したプロジェクトファイル（.qda.json）を相手が「プロジェクトを読み込む」で開いてください。')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-6 md:grid-cols-2">
           <section className="flex flex-col gap-2">
-            <h3 className="text-xs font-medium tracking-wide text-muted-foreground">保存済みプロジェクト</h3>
+            <h3 className="text-xs font-medium tracking-wide text-muted-foreground">{t('保存済みプロジェクト')}</h3>
             <ul className="flex max-h-72 flex-col gap-1 overflow-y-auto">
               {projects.map((p) => (
                 <li
@@ -65,13 +67,13 @@ export function ProjectDialog({ open, onOpenChange }: { open: boolean; onOpenCha
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{p.name}</p>
                     <p className="font-mono text-xs text-muted-foreground">
-                      文書 {p.documents.length} ・ コード {p.codes.length} ・ 付与 {p.codings.length}
+                      {t('文書 {d} ・ コード {c} ・ 付与 {n}', { d: p.documents.length, c: p.codes.length, n: p.codings.length })}
                     </p>
                   </div>
                   <Button
                     size="icon-sm"
                     variant="ghost"
-                    aria-label="開く"
+                    aria-label={t('開く')}
                     onClick={() => {
                       openProject(p.id)
                       onOpenChange(false)
@@ -79,22 +81,22 @@ export function ProjectDialog({ open, onOpenChange }: { open: boolean; onOpenCha
                   >
                     <FolderOpen />
                   </Button>
-                  <Button size="icon-sm" variant="ghost" aria-label="書き出し" onClick={() => downloadProject(p)}>
+                  <Button size="icon-sm" variant="ghost" aria-label={t('書き出し')} onClick={() => downloadProject(p)}>
                     <Download />
                   </Button>
                   <Button
                     size="icon-sm"
                     variant="ghost"
-                    aria-label="削除"
+                    aria-label={t('削除')}
                     onClick={() => {
-                      if (confirm(`「${p.name}」を削除しますか？この操作は取り消せません。`)) deleteProject(p.id)
+                      if (confirm(t('「{name}」を削除しますか？この操作は取り消せません。', { name: p.name }))) deleteProject(p.id)
                     }}
                   >
                     <Trash2 />
                   </Button>
                 </li>
               ))}
-              {projects.length === 0 && <li className="text-sm text-muted-foreground">まだプロジェクトがありません。</li>}
+              {projects.length === 0 && <li className="text-sm text-muted-foreground">{t('まだプロジェクトがありません。')}</li>}
             </ul>
             <input
               ref={fileRef}
@@ -109,7 +111,7 @@ export function ProjectDialog({ open, onOpenChange }: { open: boolean; onOpenCha
             />
             <Button variant="outline" onClick={() => fileRef.current?.click()}>
               <Upload data-icon="inline-start" />
-              プロジェクトを読み込む
+              {t('プロジェクトを読み込む')}
             </Button>
             {error && <p className="text-sm text-destructive">{error}</p>}
           </section>
@@ -125,18 +127,18 @@ export function ProjectDialog({ open, onOpenChange }: { open: boolean; onOpenCha
               onOpenChange(false)
             }}
           >
-            <h3 className="text-xs font-medium tracking-wide text-muted-foreground">新規プロジェクト</h3>
+            <h3 className="text-xs font-medium tracking-wide text-muted-foreground">{t('新規プロジェクト')}</h3>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pname">名前</Label>
-              <Input id="pname" value={name} onChange={(e) => setName(e.target.value)} placeholder="例：小学校4年 総合の授業" />
+              <Label htmlFor="pname">{t('名前')}</Label>
+              <Input id="pname" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('例：小学校4年 総合の授業')} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="pdesc">説明・研究課題</Label>
+              <Label htmlFor="pdesc">{t('説明・研究課題')}</Label>
               <Textarea id="pdesc" value={desc} onChange={(e) => setDesc(e.target.value)} rows={4} />
             </div>
             <Button type="submit" disabled={!name.trim()}>
               <Plus data-icon="inline-start" />
-              作成する
+              {t('作成する')}
             </Button>
           </form>
         </div>

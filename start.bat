@@ -25,7 +25,7 @@ if not exist ".next\BUILD_ID" (
 )
 
 echo ============================================
-echo  Kotoba Lens is starting: http://localhost:3000
+echo  LAT35++ v0.1 is starting: http://localhost:3000
 echo  Close this window (or press Ctrl+C) to stop.
 echo ============================================
 

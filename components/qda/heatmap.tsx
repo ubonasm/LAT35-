@@ -1,10 +1,12 @@
 'use client'
 
 import type { Matrix } from '@/lib/qda/analysis'
+import { useT } from '@/lib/i18n'
 
 export function Heatmap({ matrix, mono }: { matrix: Matrix; mono?: boolean }) {
+  const t = useT()
   const n = matrix.labels.length
-  if (n === 0) return <p className="p-6 text-sm text-muted-foreground">表示する対象がありません。</p>
+  if (n === 0) return <p className="p-6 text-sm text-muted-foreground">{t('表示する対象がありません。')}</p>
   const cell = n > 25 ? 18 : n > 15 ? 24 : 34
   const labelW = 96
   const size = labelW + n * cell
@@ -17,7 +19,7 @@ export function Heatmap({ matrix, mono }: { matrix: Matrix; mono?: boolean }) {
         width={size + 8}
         height={size + 8}
         role="img"
-        aria-label="類似度ヒートマップ"
+        aria-label={t('類似度ヒートマップ')}
         className="font-sans"
       >
         {matrix.labels.map((l, i) => (

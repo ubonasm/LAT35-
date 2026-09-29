@@ -3,9 +3,11 @@
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useUI } from '@/lib/qda/store'
 import { DEGREE_WIDTH, type Project } from '@/lib/qda/types'
+import { useT } from '@/lib/i18n'
 
 export function DegreeTimeline({ project, docIds, codeIds }: { project: Project; docIds: string[]; codeIds: string[] }) {
   const jumpTo = useUI((s) => s.jumpTo)
+  const t = useT()
   const docs = project.documents.filter((d) => docIds.includes(d.id))
   const codes = project.codes.filter((c) => codeIds.includes(c.id))
 
@@ -21,9 +23,9 @@ export function DegreeTimeline({ project, docIds, codeIds }: { project: Project;
   return (
     <div className="flex flex-col gap-8">
       <section className="flex flex-col gap-3">
-        <h3 className="text-sm font-medium">コードライン（発言の流れに沿った度合い）</h3>
+        <h3 className="text-sm font-medium">{t('コードライン（発言の流れに沿った度合い）')}</h3>
         <p className="text-xs leading-relaxed text-muted-foreground">
-          横軸は発言の順序、縦棒の太さと高さが度合い（1〜3）です。棒をクリックすると本文へ移動します。
+          {t('横軸は発言の順序、縦棒の太さと高さが度合い（1〜3）です。棒をクリックすると本文へ移動します。')}
         </p>
         {docs.map((d) => {
           const n = d.utterances.length
@@ -45,8 +47,8 @@ export function DegreeTimeline({ project, docIds, codeIds }: { project: Project;
                             key={x.id}
                             type="button"
                             onClick={() => jumpTo(d.id, x.start.u)}
-                            title={`#${d.utterances[x.start.u]?.number} 度合い${x.degree}`}
-                            aria-label={`#${d.utterances[x.start.u]?.number} 度合い${x.degree}`}
+                            title={t('#{n} 度合い{d}', { n: d.utterances[x.start.u]?.number ?? '', d: x.degree })}
+                            aria-label={t('#{n} 度合い{d}', { n: d.utterances[x.start.u]?.number ?? '', d: x.degree })}
                             className="absolute bottom-1 -translate-x-1/2 rounded-full"
                             style={{
                               left: `${((x.start.u + 0.5) / n) * 100}%`,
@@ -72,7 +74,7 @@ export function DegreeTimeline({ project, docIds, codeIds }: { project: Project;
 
       {docs.length > 1 && (
         <section className="flex flex-col gap-3">
-          <h3 className="text-sm font-medium">文書（回）ごとの平均度合い</h3>
+          <h3 className="text-sm font-medium">{t('文書（回）ごとの平均度合い')}</h3>
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 8, right: 16, left: -16, bottom: 8 }}>

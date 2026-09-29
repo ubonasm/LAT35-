@@ -27,6 +27,7 @@ import { MdsMap, type MdsColor } from './mds-map'
 import { NativeSelect } from './native-select'
 import { NetworkGraph, type NetworkOptions } from './network-graph'
 import { ScatterMap, type MapPoint } from './scatter-map'
+import { useT } from '@/lib/i18n'
 
 type Tab = 'words' | 'ca' | 'codes' | 'degree'
 type Display = 'network' | 'mds' | 'heatmap'
@@ -61,9 +62,10 @@ function useTokenize(project: Project) {
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  const t = useT()
   return (
     <fieldset className="flex flex-col gap-1.5">
-      <legend className="mb-1.5 text-xs font-medium tracking-wide text-muted-foreground">{label}</legend>
+      <legend className="mb-1.5 text-xs font-medium tracking-wide text-muted-foreground">{t(label)}</legend>
       {children}
     </fieldset>
   )
@@ -84,9 +86,10 @@ function NumberField({
   max?: number
   title?: string
 }) {
+  const t = useT()
   return (
-    <label className="flex flex-col gap-1 text-xs text-muted-foreground" title={title}>
-      {label}
+    <label className="flex flex-col gap-1 text-xs text-muted-foreground" title={title ? t(title) : undefined}>
+      {t(label)}
       <Input
         type="number"
         min={min}
@@ -136,8 +139,9 @@ function Segmented<T extends string>({
   items: [T, string][]
   label: string
 }) {
+  const t = useT()
   return (
-    <div className="flex rounded-md bg-muted p-0.5" role="radiogroup" aria-label={label}>
+    <div className="flex rounded-md bg-muted p-0.5" role="radiogroup" aria-label={t(label)}>
       {items.map(([id, text]) => (
         <button
           key={id}
@@ -147,7 +151,7 @@ function Segmented<T extends string>({
           onClick={() => onChange(id)}
           className="rounded-sm px-2.5 py-1 text-xs text-muted-foreground aria-checked:bg-card aria-checked:font-medium aria-checked:text-foreground aria-checked:shadow-sm"
         >
-          {text}
+          {t(text)}
         </button>
       ))}
     </div>
@@ -202,14 +206,15 @@ function NetworkControls({
   onChange: (v: NetworkOptions) => void
   allowOwnColor?: boolean
 }) {
+  const t = useT()
   const set = (patch: Partial<NetworkOptions>) => onChange({ ...value, ...patch })
   return (
     <div className="flex flex-wrap items-end gap-x-4 gap-y-2 rounded-lg border border-border bg-card px-3 py-2">
       <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-        描画する線
+        {t('描画する線')}
         <NativeSelect value={value.mode} onChange={(e) => set({ mode: e.target.value as NetworkOptions['mode'] })} className="h-8 w-40">
-          <option value="top">類似度の上位から</option>
-          <option value="threshold">閾値以上のみ</option>
+          <option value="top">{t('類似度の上位から')}</option>
+          <option value="threshold">{t('閾値以上のみ')}</option>
         </NativeSelect>
       </label>
       {value.mode === 'top' ? (
@@ -218,7 +223,7 @@ function NetworkControls({
         </div>
       ) : (
         <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-          閾値
+          {t('閾値')}
           <span className="flex h-8 items-center gap-2">
             <input
               type="range"
@@ -228,33 +233,34 @@ function NetworkControls({
               value={value.threshold}
               onChange={(e) => set({ threshold: Number(e.target.value) })}
               className="w-32 accent-primary"
-              aria-label="線を引く閾値"
+              aria-label={t('線を引く閾値')}
             />
             <span className="w-8 font-mono text-foreground">{value.threshold.toFixed(2)}</span>
           </span>
         </label>
       )}
       <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-        色分け
+        {t('色分け')}
         <NativeSelect value={value.colorBy} onChange={(e) => set({ colorBy: e.target.value as NetworkOptions['colorBy'] })} className="h-8 w-44">
-          <option value="community">グループ別</option>
-          {allowOwnColor && <option value="own">コードの色</option>}
-          <option value="none">なし（白黒・論文用）</option>
+          <option value="community">{t('グループ別')}</option>
+          {allowOwnColor && <option value="own">{t('コードの色')}</option>}
+          <option value="none">{t(MONO_LABEL)}</option>
         </NativeSelect>
       </label>
       <label className="flex h-8 items-center gap-2 text-xs">
         <Checkbox checked={value.mst} onCheckedChange={(v) => set({ mst: v === true })} />
-        最小スパニング・ツリーのみ
+        {t('最小スパニング・ツリーのみ')}
       </label>
       <label className="flex h-8 items-center gap-2 text-xs">
         <Checkbox checked={value.hideIsolated} onCheckedChange={(v) => set({ hideIsolated: v === true })} />
-        孤立した語を隠す
+        {t('孤立した語を隠す')}
       </label>
     </div>
   )
 }
 
 export function AnalysisView() {
+  const t = useT()
   const project = useActiveProject()!
   const [tab, setTab] = useState<Tab>('words')
   const [dictOpen, setDictOpen] = useState(false)
@@ -267,7 +273,7 @@ export function AnalysisView() {
   return (
     <main className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center gap-2 border-b border-border bg-card pr-3">
-        <div role="tablist" aria-label="分析" className="flex flex-1 gap-4 overflow-x-auto px-4">
+        <div role="tablist" aria-label={t('分析')} className="flex flex-1 gap-4 overflow-x-auto px-4">
           {tabs.map(([id, label]) => (
             <button
               key={id}
@@ -276,13 +282,13 @@ export function AnalysisView() {
               onClick={() => setTab(id)}
               className="shrink-0 border-b-2 border-transparent py-2.5 text-sm text-muted-foreground aria-selected:border-primary aria-selected:font-medium aria-selected:text-foreground"
             >
-              {label}
+              {t(label)}
             </button>
           ))}
         </div>
         <Button size="sm" variant="outline" onClick={() => setDictOpen(true)}>
           <BookText data-icon="inline-start" />
-          語の取り扱い（辞書）
+          {t('語の取り扱い（辞書）')}
           {(project.dictionary?.length ?? 0) > 0 && (
             <span className="font-mono text-xs text-muted-foreground">{project.dictionary!.length}</span>
           )}
@@ -309,12 +315,15 @@ function Layout({ controls, children }: { controls: React.ReactNode; children: R
 }
 
 function EngineNote({ engine }: { engine?: { engine: string } }) {
+  const t = useT()
   if (!engine) return null
   return (
     <p className="text-xs leading-relaxed text-muted-foreground">
-      {engine.engine === 'kuromoji'
-        ? '形態素解析：kuromoji（IPA辞書）＋プロジェクトのユーザー辞書'
-        : '形態素解析：簡易分割（kuromojiを読み込めなかったため、品詞は推定です）'}
+      {t(
+        engine.engine === 'kuromoji'
+          ? '形態素解析：kuromoji（IPA辞書）＋プロジェクトのユーザー辞書'
+          : '形態素解析：簡易分割（kuromojiを読み込めなかったため、品詞は推定です）',
+      )}
     </p>
   )
 }
@@ -334,6 +343,7 @@ const MEASURE_LABEL: Record<Measure, string> = {
 }
 
 function WordAnalysis({ project }: { project: Project }) {
+  const t = useT()
   const { engine, tokenize, isLoading } = useTokenize(project)
   const [docIds, setDocIds] = useState(project.documents.map((d) => d.id))
   const speakers = useMemo(
@@ -360,10 +370,10 @@ function WordAnalysis({ project }: { project: Project }) {
   const [figColor, setFigColor] = useState<MdsColor>('cluster')
   const run = (focusWords = focus) => {
     const f = Number(from)
-    const t = Number(to)
+    const toN = Number(to)
     setParams({
       docIds,
-      range: from || to ? [f || 1, t || Number.MAX_SAFE_INTEGER] : null,
+      range: from || to ? [f || 1, toN || Number.MAX_SAFE_INTEGER] : null,
       speakers: spk,
       pos,
       minFreq,
@@ -390,16 +400,16 @@ function WordAnalysis({ project }: { project: Project }) {
           </Field>
           <Field label="発言番号の区間（行番号）">
             <div className="flex items-center gap-2">
-              <Input aria-label="開始" type="number" min={1} placeholder="最初" value={from} onChange={(e) => setFrom(e.target.value)} className="h-8" />
+              <Input aria-label={t('開始')} type="number" min={1} placeholder={t('最初')} value={from} onChange={(e) => setFrom(e.target.value)} className="h-8" />
               <span className="text-muted-foreground">{'〜'}</span>
-              <Input aria-label="終了" type="number" min={1} placeholder="最後" value={to} onChange={(e) => setTo(e.target.value)} className="h-8" />
+              <Input aria-label={t('終了')} type="number" min={1} placeholder={t('最後')} value={to} onChange={(e) => setTo(e.target.value)} className="h-8" />
             </div>
           </Field>
           <Field label="発言者">
             <CheckList items={speakers} value={spk ?? speakers} onChange={(v) => setSpk(v.length === speakers.length ? null : v)} />
           </Field>
           <Field label="品詞">
-            <CheckList items={[...POS_OPTIONS]} value={pos} onChange={setPos} />
+            <CheckList items={[...POS_OPTIONS]} value={pos} onChange={setPos} render={(p) => t(p)} />
           </Field>
           <div className="grid grid-cols-3 gap-2">
             <NumberField label="最小頻度" value={minFreq} min={1} onChange={setMinFreq} />
@@ -411,12 +421,12 @@ function WordAnalysis({ project }: { project: Project }) {
               <Input
                 value={focusInput}
                 onChange={(e) => setFocusInput(e.target.value)}
-                placeholder="例：戦争 日本人 やめる"
+                placeholder={t('例：戦争 日本人 やめる')}
                 className="h-8"
-                aria-label="注目語を追加"
+                aria-label={t('注目語を追加')}
               />
               <Button type="submit" size="sm" variant="outline" disabled={!focusInput.trim()}>
-                追加
+                {t('追加')}
               </Button>
             </form>
             {focus.length > 0 && (
@@ -424,30 +434,30 @@ function WordAnalysis({ project }: { project: Project }) {
                 {focus.map((w) => (
                   <span key={w} className="flex items-center gap-1 rounded-md bg-accent py-0.5 pr-1 pl-2 text-sm text-accent-foreground">
                     {w}
-                    <button type="button" aria-label={`${w}を注目語から外す`} className="rounded p-0.5 hover:bg-card" onClick={() => setFocus(focus.filter((x) => x !== w))}>
+                    <button type="button" aria-label={t('{w}を注目語から外す', { w })} className="rounded p-0.5 hover:bg-card" onClick={() => setFocus(focus.filter((x) => x !== w))}>
                       <X className="size-3.5" />
                     </button>
                   </span>
                 ))}
                 <button type="button" className="text-xs text-muted-foreground underline" onClick={() => setFocus([])}>
-                  すべて外す
+                  {t('すべて外す')}
                 </button>
               </div>
             )}
-            <p className="text-xs leading-relaxed text-muted-foreground">下の頻出語の表をクリックしても追加できます。</p>
+            <p className="text-xs leading-relaxed text-muted-foreground">{t('下の頻出語の表をクリックしても追加できます。')}</p>
           </Field>
           <Field label="類似度の指標">
             <NativeSelect value={measure} onChange={(e) => setMeasure(e.target.value as Measure)}>
               {(Object.keys(MEASURE_LABEL) as Measure[]).map((m) => (
                 <option key={m} value={m}>
-                  {MEASURE_LABEL[m]}
+                  {t(MEASURE_LABEL[m])}
                 </option>
               ))}
             </NativeSelect>
           </Field>
           <Button onClick={() => run()} disabled={isLoading || !tokenize || docIds.length === 0 || pos.length === 0}>
             <Play data-icon="inline-start" />
-            {isLoading ? '形態素解析器を準備中…' : '可視化する'}
+            {t(isLoading ? '形態素解析器を準備中…' : '可視化する')}
           </Button>
           <EngineNote engine={engine} />
         </>
@@ -455,21 +465,22 @@ function WordAnalysis({ project }: { project: Project }) {
     >
       {!result ? (
         <Empty>
-          <p>条件を選んで「可視化する」を押してください。</p>
-          <p className="text-xs">発言（または指定した発言数のまとまり）を単位に、語同士の共起・類似度を計算します。</p>
+          <p>{t('条件を選んで「可視化する」を押してください。')}</p>
+          <p className="text-xs">{t('発言（または指定した発言数のまとまり）を単位に、語同士の共起・類似度を計算します。')}</p>
         </Empty>
       ) : (
         <>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground">
-              {MEASURE_LABEL[params!.measure]} ・ {result.utteranceCount}発言 ・ {result.unitCount}単位 ・ 異なり語数 {result.stats.length}
-              {params!.focus.length > 0 && ` ・ 注目語 ${result.matrix.labels.length}語`}
+              {t(MEASURE_LABEL[params!.measure])} ・{' '}
+              {t('{u}発言 ・ {n}単位 ・ 異なり語数 {w}', { u: result.utteranceCount, n: result.unitCount, w: result.stats.length })}
+              {params!.focus.length > 0 && t(' ・ 注目語 {n}語', { n: result.matrix.labels.length })}
             </p>
             <Segmented label="表示形式" value={display} onChange={setDisplay} items={Object.entries(DISPLAY_LABEL) as [Display, string][]} />
           </div>
           {result.missingFocus.length > 0 && (
             <p className="rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
-              {`見つからなかった注目語：${result.missingFocus.join('、')}（語の分割のされ方は「語の取り扱い（辞書）」で調整できます）`}
+              {t('見つからなかった注目語：{w}（語の分割のされ方は「語の取り扱い（辞書）」で調整できます）', { w: result.missingFocus.join(', ') })}
             </p>
           )}
           {display === 'network' && <NetworkControls value={net} onChange={setNet} />}
@@ -487,7 +498,7 @@ function WordAnalysis({ project }: { project: Project }) {
               )}
             </div>
           )}
-          <ExportableFigure filename={`語_${DISPLAY_LABEL[display]}_${params!.measure}`}>
+          <ExportableFigure filename={`${t('語')}_${t(DISPLAY_LABEL[display])}_${params!.measure}`}>
             {display === 'network' && <NetworkGraph matrix={result.matrix} options={net} />}
             {display === 'mds' && <MdsMap matrix={result.matrix} clusters={clusters} color={figColor} />}
             {display === 'heatmap' && <Heatmap matrix={result.matrix} mono={figColor === 'none'} />}
@@ -515,21 +526,22 @@ function FrequencyTable({
   focus: string[]
   onToggle: (w: string) => void
 }) {
+  const t = useT()
   return (
     <div className="overflow-x-auto rounded-lg border border-border bg-card">
       <table className="w-full text-sm">
         <caption className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">
-          頻出語（上位100） ・ 行をクリックで注目語に追加／解除 → 「可視化する」で反映
+          {t('頻出語（上位100） ・ 行をクリックで注目語に追加／解除 → 「可視化する」で反映')}
         </caption>
         <thead>
           <tr className="border-y border-border text-xs text-muted-foreground">
             <th className="w-8 px-3 py-1.5">
-              <span className="sr-only">注目語</span>
+              <span className="sr-only">{t('注目語')}</span>
             </th>
-            <th className="px-3 py-1.5 text-left font-medium">語</th>
-            <th className="px-3 py-1.5 text-left font-medium">品詞</th>
-            <th className="px-3 py-1.5 text-right font-medium">出現頻度</th>
-            <th className="px-3 py-1.5 text-right font-medium">出現単位数</th>
+            <th className="px-3 py-1.5 text-left font-medium">{t('語')}</th>
+            <th className="px-3 py-1.5 text-left font-medium">{t('品詞')}</th>
+            <th className="px-3 py-1.5 text-right font-medium">{t('出現頻度')}</th>
+            <th className="px-3 py-1.5 text-right font-medium">{t('出現単位数')}</th>
             <th className="px-3 py-1.5 text-right font-medium">TF-IDF</th>
           </tr>
         </thead>
@@ -537,10 +549,10 @@ function FrequencyTable({
           {stats.map((s) => (
             <tr key={s.word} className="cursor-pointer border-b border-border/60 last:border-b-0 hover:bg-muted/50" onClick={() => onToggle(s.word)}>
               <td className="px-3 py-1">
-                <Checkbox checked={focus.includes(s.word)} aria-label={`${s.word}を注目語にする`} onClick={(e) => e.stopPropagation()} onCheckedChange={() => onToggle(s.word)} />
+                <Checkbox checked={focus.includes(s.word)} aria-label={t('{w}を注目語にする', { w: s.word })} onClick={(e) => e.stopPropagation()} onCheckedChange={() => onToggle(s.word)} />
               </td>
               <td className="px-3 py-1">{s.word}</td>
-              <td className="px-3 py-1 text-muted-foreground">{s.pos}</td>
+              <td className="px-3 py-1 text-muted-foreground">{t(s.pos)}</td>
               <td className="px-3 py-1 text-right font-mono">{s.freq}</td>
               <td className="px-3 py-1 text-right font-mono">{s.df}</td>
               <td className="px-3 py-1 text-right font-mono">{s.tfidf.toFixed(2)}</td>
@@ -560,6 +572,7 @@ const CA_COLUMN_LABEL: Record<CAColumn, string> = {
 }
 
 function CorrespondenceView({ project }: { project: Project }) {
+  const t = useT()
   const { engine, tokenize, isLoading } = useTokenize(project)
   const [docIds, setDocIds] = useState(project.documents.map((d) => d.id))
   const [codeIds, setCodeIds] = useState(project.codes.map((c) => c.id))
@@ -598,7 +611,7 @@ function CorrespondenceView({ project }: { project: Project }) {
             <NativeSelect value={column} onChange={(e) => setColumn(e.target.value as CAColumn)}>
               {(Object.keys(CA_COLUMN_LABEL) as CAColumn[]).map((c) => (
                 <option key={c} value={c}>
-                  {CA_COLUMN_LABEL[c]}
+                  {t(CA_COLUMN_LABEL[c])}
                 </option>
               ))}
             </NativeSelect>
@@ -612,7 +625,7 @@ function CorrespondenceView({ project }: { project: Project }) {
             </Field>
           )}
           <Field label="品詞">
-            <CheckList items={[...POS_OPTIONS]} value={pos} onChange={setPos} />
+            <CheckList items={[...POS_OPTIONS]} value={pos} onChange={setPos} render={(p) => t(p)} />
           </Field>
           <div className="grid grid-cols-2 gap-2">
             <NumberField label="最小頻度" value={minFreq} min={1} onChange={setMinFreq} />
@@ -621,12 +634,12 @@ function CorrespondenceView({ project }: { project: Project }) {
           {usesCodes && (
             <label className="flex items-start gap-2 text-sm">
               <Checkbox className="mt-0.5" checked={weightDegree} onCheckedChange={(v) => setWeightDegree(v === true)} />
-              <span className="leading-relaxed">度合い（1〜3）で語の出現を重み付けする</span>
+              <span className="leading-relaxed">{t('度合い（1〜3）で語の出現を重み付けする')}</span>
             </label>
           )}
           <Button onClick={() => setRunKey((k) => k + 1)} disabled={isLoading || !tokenize || pos.length === 0}>
             <Play data-icon="inline-start" />
-            {isLoading ? '形態素解析器を準備中…' : '対応分析を実行'}
+            {t(isLoading ? '形態素解析器を準備中…' : '対応分析を実行')}
           </Button>
           <EngineNote engine={engine} />
         </>
@@ -634,14 +647,14 @@ function CorrespondenceView({ project }: { project: Project }) {
     >
       {!result ? (
         <Empty>
-          <p>「対応分析を実行」を押してください。</p>
-          <p className="text-xs">語 × コード（または発言者・文書）の集計表から、両者の対応関係を2次元に配置します。</p>
+          <p>{t('「対応分析を実行」を押してください。')}</p>
+          <p className="text-xs">{t('語 × コード（または発言者・文書）の集計表から、両者の対応関係を2次元に配置します。')}</p>
         </Empty>
       ) : !result.ca ? (
         <Empty>
-          <p>対応分析には、語が2つ以上、列（コードなど）が3つ以上必要です。</p>
+          <p>{t('対応分析には、語が2つ以上、列（コードなど）が3つ以上必要です。')}</p>
           <p className="text-xs">
-            {`現在：語 ${result.table.rowLabels.length} ・ 列 ${result.table.colLabels.length}。コード付けを増やすか、最小頻度を下げてください。`}
+            {t('現在：語 {r} ・ 列 {c}。コード付けを増やすか、最小頻度を下げてください。', { r: result.table.rowLabels.length, c: result.table.colLabels.length })}
           </p>
         </Empty>
       ) : (
@@ -669,6 +682,7 @@ function CAFigure({
   mono: boolean
   colorControl: React.ReactNode
 }) {
+  const t = useT()
   const { table, ca } = result
   const maxF = Math.max(1, ...table.rowFreq)
   const rowColor = mono ? 'var(--mono-g3)' : 'var(--ca-row)'
@@ -697,31 +711,31 @@ function CAFigure({
     <>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <p className="text-xs text-muted-foreground">
-          {`${CA_COLUMN_LABEL[column]} ・ 語 ${table.rowLabels.length} × 列 ${table.colLabels.length} ・ ●＝語（大きさ＝出現数）、□＝${column.startsWith('code') ? 'コード' : '外部変数'}`}
+          {t('{col} ・ 語 {r} × 列 {c} ・ ●＝語（大きさ＝出現数）、□＝{kind}', { col: t(CA_COLUMN_LABEL[column]), r: table.rowLabels.length, c: table.colLabels.length, kind: t(column.startsWith('code') ? 'コード' : '外部変数') })}
         </p>
         {colorControl}
       </div>
-      <ExportableFigure filename={`対応分析_${column}${mono ? '_白黒' : ''}`}>
+      <ExportableFigure filename={`${t('対応分析')}_${column}${mono ? t('_白黒') : ''}`}>
         <div className="flex flex-col gap-1">
           <ScatterMap
             points={points}
-            xLabel={`成分1（${i1.toFixed(4)}, ${(e1 * 100).toFixed(2)}%）`}
-            yLabel={`成分2（${i2.toFixed(4)}, ${(e2 * 100).toFixed(2)}%）`}
+            xLabel={t('成分{d}（{i}, {p}%）', { d: 1, i: i1.toFixed(4), p: (e1 * 100).toFixed(2) })}
+            yLabel={t('成分{d}（{i}, {p}%）', { d: 2, i: i2.toFixed(4), p: (e2 * 100).toFixed(2) })}
             mono={mono}
             legend={
               mono
                 ? [
-                    { color: rowColor, label: '抽出語', shape: 'circle' },
-                    { color: colColor(0), label: column.startsWith('code') ? 'コード' : '外部変数', shape: 'square' },
+                    { color: rowColor, label: t('抽出語'), shape: 'circle' },
+                    { color: colColor(0), label: t(column.startsWith('code') ? 'コード' : '外部変数'), shape: 'square' },
                   ]
                 : [
-                    { color: rowColor, label: '抽出語', shape: 'circle' },
+                    { color: rowColor, label: t('抽出語'), shape: 'circle' },
                     ...table.colLabels.slice(0, 20).map((l, j) => ({ color: colColor(j), label: l, shape: 'square' as const })),
                   ]
             }
           />
           <p className="px-1 font-mono text-[11px] text-muted-foreground">
-            {`語 ${table.rowLabels.length} × 列 ${table.colLabels.length}, 総度数 ${ca.total} ・ 総慣性 ${ca.totalInertia.toFixed(4)} ・ 累積寄与率（成分1–2） ${((e1 + e2) * 100).toFixed(2)}% ・ χ²(${ca.df}) = ${ca.chi2.toFixed(2)}, ${formatP(ca.p)}`}
+            {t('語 {r} × 列 {c}, 総度数 {n} ・ 総慣性 {i} ・ 累積寄与率（成分1–2） {p}% ・ χ²({df}) = {chi}, {pv}', { r: table.rowLabels.length, c: table.colLabels.length, n: ca.total, i: ca.totalInertia.toFixed(4), p: ((e1 + e2) * 100).toFixed(2), df: ca.df, chi: ca.chi2.toFixed(2), pv: formatP(ca.p) })}
           </p>
         </div>
       </ExportableFigure>
@@ -740,14 +754,15 @@ function FigureColorSelect({
   onChange: (v: MdsColor) => void
   options: [MdsColor, string][]
 }) {
+  const t = useT()
   const current = options.some(([v]) => v === value) ? value : options[0][0]
   return (
     <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-      色
+      {t('色')}
       <NativeSelect value={current} onChange={(e) => onChange(e.target.value as MdsColor)} className="h-8 w-44">
         {options.map(([v, label]) => (
           <option key={v} value={v}>
-            {label}
+            {t(label)}
           </option>
         ))}
       </NativeSelect>
@@ -762,6 +777,7 @@ const CODE_MEASURE_LABEL: Record<CodeMeasure, string> = {
 }
 
 function CodeAnalysis({ project }: { project: Project }) {
+  const t = useT()
   const [docIds, setDocIds] = useState(project.documents.map((d) => d.id))
   const [codeIds, setCodeIds] = useState(project.codes.map((c) => c.id))
   const [measure, setMeasure] = useState<CodeMeasure>('jaccard')
@@ -791,7 +807,7 @@ function CodeAnalysis({ project }: { project: Project }) {
             <NativeSelect value={measure} onChange={(e) => setMeasure(e.target.value as CodeMeasure)}>
               {(Object.keys(CODE_MEASURE_LABEL) as CodeMeasure[]).map((m) => (
                 <option key={m} value={m}>
-                  {CODE_MEASURE_LABEL[m]}
+                  {t(CODE_MEASURE_LABEL[m])}
                 </option>
               ))}
             </NativeSelect>
@@ -799,11 +815,11 @@ function CodeAnalysis({ project }: { project: Project }) {
           <div className="grid grid-cols-2 gap-2">
             {measure === 'proximity' && <NumberField label="前後n発言" value={windowSize} min={0} onChange={setWindowSize} />}
             <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-              度合いの下限
+              {t('度合いの下限')}
               <NativeSelect value={minDegree} onChange={(e) => setMinDegree(Number(e.target.value))}>
-                <option value={1}>1以上（すべて）</option>
-                <option value={2}>2以上</option>
-                <option value={3}>3のみ</option>
+                <option value={1}>{t('1以上（すべて）')}</option>
+                <option value={2}>{t('2以上')}</option>
+                <option value={3}>{t('3のみ')}</option>
               </NativeSelect>
             </label>
           </div>
@@ -811,7 +827,7 @@ function CodeAnalysis({ project }: { project: Project }) {
       }
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs text-muted-foreground">{CODE_MEASURE_LABEL[measure]} ・ 円の大きさ＝コードが付された発言数</p>
+        <p className="text-xs text-muted-foreground">{t(CODE_MEASURE_LABEL[measure])} ・ {t('円の大きさ＝コードが付された発言数')}</p>
         <Segmented label="表示形式" value={display} onChange={setDisplay} items={Object.entries(DISPLAY_LABEL) as [Display, string][]} />
       </div>
       {display === 'network' && <NetworkControls value={net} onChange={setNet} allowOwnColor />}
@@ -833,7 +849,7 @@ function CodeAnalysis({ project }: { project: Project }) {
           )}
         </div>
       )}
-      <ExportableFigure filename={`コード_${DISPLAY_LABEL[display]}_${measure}`}>
+      <ExportableFigure filename={`${t('コード')}_${t(DISPLAY_LABEL[display])}_${measure}`}>
         {display === 'network' && <NetworkGraph matrix={matrix} options={net} />}
         {display === 'mds' && <MdsMap matrix={matrix} clusters={clusters} color={figColor} />}
         {display === 'heatmap' && <Heatmap matrix={matrix} mono={figColor === 'none'} />}
@@ -843,6 +859,7 @@ function CodeAnalysis({ project }: { project: Project }) {
 }
 
 function DegreeAnalysis({ project }: { project: Project }) {
+  const t = useT()
   const [docIds, setDocIds] = useState(project.documents.map((d) => d.id))
   const [codeIds, setCodeIds] = useState(project.codes.map((c) => c.id))
   return (
@@ -858,7 +875,7 @@ function DegreeAnalysis({ project }: { project: Project }) {
         </>
       }
     >
-      <ExportableFigure filename="度合いの推移" className="p-4">
+      <ExportableFigure filename={t('度合いの推移')} className="p-4">
         <DegreeTimeline project={project} docIds={docIds} codeIds={codeIds} />
       </ExportableFigure>
     </Layout>

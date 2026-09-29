@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { forceCollide, forceSimulation, forceX, forceY, type SimulationNodeDatum } from 'd3-force'
+import { useT } from '@/lib/i18n'
 
 export interface MapPoint {
   x: number
@@ -46,6 +47,7 @@ export function ScatterMap({
   mono?: boolean
   legend?: { color: string; label: string; shape: 'circle' | 'square' }[]
 }) {
+  const t = useT()
   const layout = useMemo(() => {
     const xs = points.map((p) => p.x)
     const ys = points.map((p) => p.y)
@@ -78,7 +80,7 @@ export function ScatterMap({
   }, [points])
 
   const { sx, sy, labels, xt, yt, x0, x1, y0, y1 } = layout
-  if (points.length === 0) return <p className="p-6 text-sm text-muted-foreground">表示する対象がありません。</p>
+  if (points.length === 0) return <p className="p-6 text-sm text-muted-foreground">{t('表示する対象がありません。')}</p>
 
   return (
     <svg viewBox={`0 0 ${W + (legend ? 150 : 0)} ${H}`} className="h-auto w-full font-sans" style={{ maxHeight: '78vh' }} role="img" aria-label={`${xLabel} × ${yLabel}`}>

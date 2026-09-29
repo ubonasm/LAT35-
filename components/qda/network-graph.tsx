@@ -12,6 +12,7 @@ import {
 } from 'd3-force'
 import type { Matrix } from '@/lib/qda/analysis'
 import { communities, PALETTE, selectEdges, spanningTree, type EdgeMode } from '@/lib/qda/stats'
+import { useT } from '@/lib/i18n'
 
 export type ColorBy = 'community' | 'own' | 'none'
 
@@ -38,6 +39,7 @@ interface Link {
 const LEGEND_W = 150
 
 export function NetworkGraph({ matrix, options }: { matrix: Matrix; options: NetworkOptions }) {
+  const t = useT()
   const layout = useMemo(() => {
     const n = matrix.labels.length
     let edges = selectEdges(matrix.values, options.mode, options.top, options.threshold)
@@ -110,7 +112,7 @@ export function NetworkGraph({ matrix, options }: { matrix: Matrix; options: Net
 
   const { nodes, links, comm, norm, minX, minY, w, h, commCount, density, maxW } = layout
   if (nodes.length === 0)
-    return <p className="p-6 text-sm text-muted-foreground">表示できる線がありません。描画する線の数を増やすか、閾値を下げてください。</p>
+    return <p className="p-6 text-sm text-muted-foreground">{t('表示できる線がありません。描画する線の数を増やすか、閾値を下げてください。')}</p>
 
   const fillOf = (i: number) => {
     if (options.colorBy === 'own' && matrix.colors) return matrix.colors[i]
@@ -131,7 +133,7 @@ export function NetworkGraph({ matrix, options }: { matrix: Matrix; options: Net
         className="h-auto w-full font-sans"
         style={{ maxHeight: '78vh' }}
         role="img"
-        aria-label="共起ネットワーク"
+        aria-label={t('共起ネットワーク')}
       >
         <rect x={minX} y={minY} width={w + LEGEND_W} height={legendH} fill="var(--card)" />
         {links.map((l, k) => {
@@ -174,7 +176,7 @@ export function NetworkGraph({ matrix, options }: { matrix: Matrix; options: Net
         <g transform={`translate(${minX + w + 10},${minY + 20})`} className="text-[11px]">
           {options.colorBy === 'community' && (
             <>
-              <text className="fill-foreground font-medium">グループ</text>
+              <text className="fill-foreground font-medium">{t('グループ')}</text>
               {communityIds.map((c, k) => (
                 <g key={c} transform={`translate(${(k % 2) * 60},${16 + Math.floor(k / 2) * 17})`}>
                   <rect width={12} height={12} y={-10} rx={2} fill={PALETTE[c % PALETTE.length]} stroke="var(--network-node-stroke)" strokeWidth={0.5} />
@@ -186,7 +188,7 @@ export function NetworkGraph({ matrix, options }: { matrix: Matrix; options: Net
             </>
           )}
           <g transform={`translate(0,${options.colorBy === 'community' ? 36 + Math.ceil(communityIds.length / 2) * 17 : 0})`}>
-            <text className="fill-foreground font-medium">頻度</text>
+            <text className="fill-foreground font-medium">{t('頻度')}</text>
             {sizeSteps.map((v, k) => {
               const r = 8 + 20 * Math.sqrt(v / maxW)
               const y = 18 + k * 52 + r
@@ -204,7 +206,7 @@ export function NetworkGraph({ matrix, options }: { matrix: Matrix; options: Net
       </svg>
       <p className="px-1 font-mono text-[11px] text-muted-foreground">
         {`N ${nodes.length}, E ${links.length}, D ${density.toFixed(3)}`}
-        {dashed && ` ・ グループ ${commCount}（modularity） ・ 実線＝同じグループ内、点線＝グループ間`}
+        {dashed && t(' ・ グループ {n}（modularity） ・ 実線＝同じグループ内、点線＝グループ間', { n: commCount })}
       </p>
     </div>
   )

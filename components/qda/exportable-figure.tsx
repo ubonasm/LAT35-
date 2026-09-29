@@ -4,8 +4,29 @@ import { useRef, useState } from 'react'
 import { Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useT } from '@/lib/i18n'
 
-type Format = 'png' | 'jpg' | 'pdf'
+type Format = 'png' | 'jpg' | 'pdf' | 'svg'
+
+const SVG_STYLE_PROPS = [
+  'fill',
+  'fill-opacity',
+  'stroke',
+  'stroke-width',
+  'stroke-opacity',
+  'stroke-dasharray',
+  'stroke-linecap',
+  'stroke-linejoin',
+  'opacity',
+  'font-family',
+  'font-size',
+  'font-weight',
+  'font-style',
+  'text-anchor',
+  'dominant-baseline',
+  'paint-order',
+  'visibility',
+] as const
 
 function safeName(name: string) {
   return name.replace(/[\\/:*?"<>|\s]+/g, '_')
@@ -24,6 +45,39 @@ function trigger(href: string, filename: string) {
   a.click()
 }
 
+/**
+ * Serialises the chart's own <svg> with computed styles inlined, so the file stays
+ * real vector graphics that Illustrator / Inkscape / Word can edit (html-to-image's
+ * SVG output wraps HTML in <foreignObject>, which those tools can't render).
+ */
+function nativeSvg(svg: SVGSVGElement, background: string): string {
+  const clone = svg.cloneNode(true) as SVGSVGElement
+  const src = [svg, ...svg.querySelectorAll('*')]
+  const dst = [clone, ...clone.querySelectorAll('*')]
+  src.forEach((el, i) => {
+    const cs = getComputedStyle(el)
+    const target = dst[i] as SVGElement
+    const style = SVG_STYLE_PROPS.map((p) => `${p}:${cs.getPropertyValue(p)}`).join(';')
+    target.setAttribute('style', style)
+    target.removeAttribute('class')
+  })
+  const box = svg.viewBox.baseVal
+  const w = box && box.width ? box.width : svg.clientWidth
+  const h = box && box.height ? box.height : svg.clientHeight
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+  clone.setAttribute('width', String(w))
+  clone.setAttribute('height', String(h))
+  if (!clone.getAttribute('viewBox')) clone.setAttribute('viewBox', `0 0 ${w} ${h}`)
+  const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+  bg.setAttribute('x', String(box?.x ?? 0))
+  bg.setAttribute('y', String(box?.y ?? 0))
+  bg.setAttribute('width', String(w))
+  bg.setAttribute('height', String(h))
+  bg.setAttribute('fill', background)
+  clone.insertBefore(bg, clone.firstChild)
+  return `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(clone)}`
+}
+
 export function ExportableFigure({
   filename,
   className,
@@ -36,6 +90,7 @@ export function ExportableFigure({
   const ref = useRef<HTMLDivElement>(null)
   const [busy, setBusy] = useState<Format | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const t = useT()
 
   const exportAs = async (format: Format) => {
     const node = ref.current
@@ -43,7 +98,7 @@ export function ExportableFigure({
     setBusy(format)
     setError(null)
     try {
-      const { toJpeg, toPng } = await import('html-to-image')
+      const { toJpeg, toPng, toSvg } = await import('html-to-image')
       const backgroundColor = getComputedStyle(node).backgroundColor
       const opts = { pixelRatio: 2, backgroundColor, cacheBust: true }
       const base = `${safeName(filename)}_${stamp()}`
@@ -51,6 +106,18 @@ export function ExportableFigure({
         trigger(await toPng(node, opts), `${base}.png`)
       } else if (format === 'jpg') {
         trigger(await toJpeg(node, { ...opts, quality: 0.95 }), `${base}.jpg`)
+      } else if (format === 'svg') {
+        const svgs = [...node.querySelectorAll<SVGSVGElement>('svg')].filter(
+          (s) => !s.parentElement?.closest('svg') && s.clientWidth > 120,
+        )
+        if (svgs.length === 1) {
+          const blob = new Blob([nativeSvg(svgs[0], backgroundColor)], { type: 'image/svg+xml' })
+          const url = URL.createObjectURL(blob)
+          trigger(url, `${base}.svg`)
+          setTimeout(() => URL.revokeObjectURL(url), 1000)
+        } else {
+          trigger(await toSvg(node, opts), `${base}.svg`)
+        }
       } else {
         const dataUrl = await toPng(node, opts)
         const { jsPDF } = await import('jspdf')
@@ -67,7 +134,7 @@ export function ExportableFigure({
         pdf.save(`${base}.pdf`)
       }
     } catch {
-      setError('図の書き出しに失敗しました。もう一度お試しください。')
+      setError(t('図の書き出しに失敗しました。もう一度お試しください。'))
     } finally {
       setBusy(null)
     }
@@ -78,9 +145,9 @@ export function ExportableFigure({
       <div className="flex flex-wrap items-center justify-end gap-1.5">
         <span className="mr-1 flex items-center gap-1 text-xs text-muted-foreground">
           <Download className="size-3.5" aria-hidden />
-          図を保存
+          {t('図を保存')}
         </span>
-        {(['png', 'jpg', 'pdf'] as Format[]).map((f) => (
+        {(['png', 'jpg', 'pdf', 'svg'] as Format[]).map((f) => (
           <Button key={f} size="sm" variant="outline" className="h-7 px-2.5 font-mono text-xs uppercase" disabled={busy !== null} onClick={() => exportAs(f)}>
             {busy === f ? '…' : f}
           </Button>

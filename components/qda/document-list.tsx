@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/button'
 import { parseFile } from '@/lib/qda/parse'
 import { useActiveProject, useProjects } from '@/lib/qda/store'
 import { cn } from '@/lib/utils'
+import { useT } from '@/lib/i18n'
 
 export function DocumentList() {
   const project = useActiveProject()
   const { activeDocId, openDocument, addDocument, deleteDocument } = useProjects()
   const fileRef = useRef<HTMLInputElement>(null)
   const [msg, setMsg] = useState<string | null>(null)
+  const t = useT()
 
   if (!project) return null
 
@@ -21,16 +23,16 @@ export function DocumentList() {
       const utterances = await parseFile(f)
       if (utterances.length === 0) continue
       addDocument(f.name.replace(/\.(csv|txt)$/i, ''), utterances)
-      names.push(`${f.name}（${utterances.length}発言）`)
+      names.push(t('{name}（{n}発言）', { name: f.name, n: utterances.length }))
     }
-    setMsg(names.length ? `読み込み: ${names.join('、')}` : '発言を読み取れませんでした。')
+    setMsg(names.length ? t('読み込み: {names}', { names: names.join(', ') }) : t('発言を読み取れませんでした。'))
   }
 
   return (
     <section className="flex flex-col gap-2" aria-labelledby="doc-heading">
       <div className="flex items-center justify-between">
         <h2 id="doc-heading" className="text-xs font-medium tracking-wide text-muted-foreground">
-          文書
+          {t('文書')}
         </h2>
         <Button size="xs" variant="ghost" onClick={() => fileRef.current?.click()}>
           <Upload data-icon="inline-start" />
@@ -71,8 +73,8 @@ export function DocumentList() {
                 size="icon-xs"
                 variant="ghost"
                 className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-                aria-label={`${d.name}を削除`}
-                onClick={() => confirm(`「${d.name}」とそのコード付与を削除しますか？`) && deleteDocument(d.id)}
+                aria-label={t('{name}を削除', { name: d.name })}
+                onClick={() => confirm(t('「{name}」とそのコード付与を削除しますか？', { name: d.name })) && deleteDocument(d.id)}
               >
                 <Trash2 />
               </Button>
@@ -82,7 +84,7 @@ export function DocumentList() {
       </ul>
       {project.documents.length === 0 && (
         <p className="text-xs leading-relaxed text-muted-foreground">
-          発言番号・発言者・発言内容の列を持つCSV、または「番号 発言者：内容」形式のTXTを読み込んでください。
+          {t('発言番号・発言者・発言内容の列を持つCSV、または「番号 発言者：内容」形式のTXTを読み込んでください。')}
         </p>
       )}
       {msg && <p className="text-xs leading-relaxed text-muted-foreground">{msg}</p>}

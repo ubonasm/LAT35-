@@ -8,11 +8,13 @@ import { descendantIds, isCategory, sortCodings, treeOrder } from '@/lib/qda/hie
 import { useActiveProject, useProjects, useUI } from '@/lib/qda/store'
 import { DEGREE_WIDTH, type Code, type Coding, type Degree, type Project } from '@/lib/qda/types'
 import { cn } from '@/lib/utils'
+import { useT } from '@/lib/i18n'
 import { NativeSelect } from './native-select'
 
 function DegreePicker({ code, value, onChange }: { code: Code; value: Degree; onChange: (d: Degree) => void }) {
+  const t = useT()
   return (
-    <div className="flex gap-1" role="radiogroup" aria-label="度合い">
+    <div className="flex gap-1" role="radiogroup" aria-label={t('度合い')}>
       {([1, 2, 3] as Degree[]).map((d) => {
         const def = code.degrees.find((x) => x.level === d)
         return (
@@ -21,12 +23,12 @@ function DegreePicker({ code, value, onChange }: { code: Code; value: Degree; on
             type="button"
             role="radio"
             aria-checked={value === d}
-            title={`${def?.label}：${def?.description}`}
+            title={def ? `${t(def.label)}：${t(def.description)}` : undefined}
             onClick={() => onChange(d)}
             className="flex h-6 items-center gap-1 rounded-sm border border-border px-1.5 text-[11px] aria-checked:border-primary aria-checked:bg-secondary"
           >
             <span aria-hidden className="h-3.5 rounded-full" style={{ width: DEGREE_WIDTH[d], backgroundColor: code.color }} />
-            {def?.label ?? d}
+            {def ? t(def.label) : d}
           </button>
         )
       })}
@@ -74,6 +76,7 @@ function SegmentItem({ project, coding, code }: { project: Project; coding: Codi
 export function SegmentsPanel() {
   const project = useActiveProject()
   const { focusCodeId, setFocusCode } = useUI()
+  const t = useT()
   if (!project) return null
   const code = project.codes.find((c) => c.id === focusCodeId)
   if (code && isCategory(code)) return <CategoryPanel project={project} category={code} />
@@ -88,13 +91,13 @@ export function SegmentsPanel() {
       <CodeFilter project={project} />
       {code && (
         <div className="flex flex-col gap-1 rounded-md bg-muted p-2 text-xs leading-relaxed">
-          <p className="text-foreground">{code.definition || '（定義未設定）'}</p>
+          <p className="text-foreground">{code.definition || t('（定義未設定）')}</p>
           <ul className="flex flex-col gap-0.5 text-muted-foreground">
             {code.degrees.map((d) => (
               <li key={d.level} className="flex items-center gap-1.5">
                 <span aria-hidden className="h-3 shrink-0 rounded-full" style={{ width: DEGREE_WIDTH[d.level], backgroundColor: code.color }} />
-                <span className="font-medium text-foreground">{d.label}</span>
-                <span className="truncate">{d.description}</span>
+                <span className="font-medium text-foreground">{t(d.label)}</span>
+                <span className="truncate">{t(d.description)}</span>
                 <span className="ml-auto font-mono">
                   {list.filter((c) => c.degree === d.level).length}
                 </span>
@@ -108,7 +111,7 @@ export function SegmentsPanel() {
           const cd = codeMap.get(c.codeId)
           return cd ? <SegmentItem key={c.id} project={project} coding={c} code={cd} /> : null
         })}
-        {list.length === 0 && <li className="p-3 text-xs text-muted-foreground">コード付与された箇所はまだありません。</li>}
+        {list.length === 0 && <li className="p-3 text-xs text-muted-foreground">{t('コード付与された箇所はまだありません。')}</li>}
       </ul>
     </div>
   )
@@ -116,13 +119,14 @@ export function SegmentsPanel() {
 
 function CodeFilter({ project }: { project: Project }) {
   const { focusCodeId, setFocusCode } = useUI()
+  const t = useT()
   return (
-    <NativeSelect aria-label="コードで絞り込み" value={focusCodeId ?? ''} onChange={(e) => setFocusCode(e.target.value || null)}>
-      <option value="">すべてのコード</option>
+    <NativeSelect aria-label={t('コードで絞り込み')} value={focusCodeId ?? ''} onChange={(e) => setFocusCode(e.target.value || null)}>
+      <option value="">{t('すべてのコード')}</option>
       {treeOrder(project.codes).map(({ code: c, depth }) => (
         <option key={c.id} value={c.id}>
           {'　'.repeat(depth)}
-          {isCategory(c) ? `［カテゴリ］${c.name}` : c.name}
+          {isCategory(c) ? t('［カテゴリ］{name}', { name: c.name }) : c.name}
         </option>
       ))}
     </NativeSelect>
@@ -131,6 +135,7 @@ function CodeFilter({ project }: { project: Project }) {
 
 function CategoryPanel({ project, category }: { project: Project; category: Code }) {
   const { setFocusCode } = useUI()
+  const t = useT()
   const scope = descendantIds(project.codes, category.id)
   const members = treeOrder(project.codes).filter(({ code }) => scope.has(code.id) && code.id !== category.id)
   const baseDepth = members[0]?.depth ?? 0
@@ -145,15 +150,15 @@ function CategoryPanel({ project, category }: { project: Project; category: Code
           <FolderTree aria-hidden className="size-4" style={{ color: category.color }} />
           {category.name}
           <span className="ml-auto font-mono text-xs font-normal text-muted-foreground">
-            コード {members.filter((m) => !isCategory(m.code)).length} ・ 付与 {total}
+            {t('コード {c} ・ 付与 {n}', { c: members.filter((m) => !isCategory(m.code)).length, n: total })}
           </span>
         </p>
-        <p className="whitespace-pre-wrap text-foreground">{category.definition || '（カテゴリの説明が未設定です。鉛筆アイコンから入力できます）'}</p>
+        <p className="whitespace-pre-wrap text-foreground">{category.definition || t('（カテゴリの説明が未設定です。鉛筆アイコンから入力できます）')}</p>
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
         {direct.length > 0 && (
           <section className="flex flex-col gap-1">
-            <h3 className="text-xs font-medium text-muted-foreground">カテゴリに直接付与（{direct.length}）</h3>
+            <h3 className="text-xs font-medium text-muted-foreground">{t('カテゴリに直接付与（{n}）', { n: direct.length })}</h3>
             <ul className="rounded-md border border-border bg-card">
               {direct.map((c) => (
                 <SegmentItem key={c.id} project={project} coding={c} code={category} />
@@ -191,14 +196,14 @@ function CategoryPanel({ project, category }: { project: Project; category: Code
                   ))}
                 </ul>
               ) : (
-                !isCategory(m) && <p className="text-[11px] text-muted-foreground">付与箇所なし</p>
+                !isCategory(m) && <p className="text-[11px] text-muted-foreground">{t('付与箇所なし')}</p>
               )}
             </section>
           )
         })}
         {members.length === 0 && direct.length === 0 && (
           <p className="text-xs leading-relaxed text-muted-foreground">
-            含むコードがありません。コードの編集画面で「上位カテゴリー」にこのカテゴリを指定してください。
+            {t('含むコードがありません。コードの編集画面で「上位カテゴリー」にこのカテゴリを指定してください。')}
           </p>
         )}
       </div>
@@ -210,10 +215,11 @@ export function CodingDetail() {
   const project = useActiveProject()
   const { updateCoding, deleteCoding } = useProjects()
   const { selectedCodingId, selectCoding, setPanelTab } = useUI()
+  const t = useT()
   const coding = project?.codings.find((c) => c.id === selectedCodingId)
   const code = project?.codes.find((c) => c.id === coding?.codeId)
   if (!project || !coding || !code) {
-    return <p className="p-2 text-xs leading-relaxed text-muted-foreground">本文左の縦棒をクリックすると、その付与箇所の詳細を表示・編集できます。</p>
+    return <p className="p-2 text-xs leading-relaxed text-muted-foreground">{t('本文左の縦棒をクリックすると、その付与箇所の詳細を表示・編集できます。')}</p>
   }
   const doc = project.documents.find((d) => d.id === coding.docId)
   return (
@@ -230,13 +236,13 @@ export function CodingDetail() {
       </div>
       <blockquote className="border-l-2 border-border pl-3 text-[13px] leading-relaxed">{codedText(project, coding)}</blockquote>
       <div className="flex flex-col gap-1.5">
-        <span className="text-xs text-muted-foreground">度合い</span>
+        <span className="text-xs text-muted-foreground">{t('度合い')}</span>
         <DegreePicker code={code} value={coding.degree} onChange={(degree) => updateCoding(coding.id, { degree })} />
-        <p className="text-xs text-muted-foreground">{code.degrees.find((d) => d.level === coding.degree)?.description}</p>
+        <p className="text-xs text-muted-foreground">{t(code.degrees.find((d) => d.level === coding.degree)?.description ?? '')}</p>
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="cmemo" className="text-xs text-muted-foreground">
-          コードの付け替え
+          {t('コードの付け替え')}
         </label>
         <NativeSelect id="cmemo-code" value={coding.codeId} onChange={(e) => updateCoding(coding.id, { codeId: e.target.value })}>
           {project.codes.map((c) => (
@@ -248,7 +254,7 @@ export function CodingDetail() {
       </div>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="cmemo" className="text-xs text-muted-foreground">
-          メモ（判断の根拠など）
+          {t('メモ（判断の根拠など）')}
         </label>
         <Textarea id="cmemo" rows={4} value={coding.memo} onChange={(e) => updateCoding(coding.id, { memo: e.target.value })} />
       </div>
@@ -262,7 +268,7 @@ export function CodingDetail() {
         }}
       >
         <Trash2 data-icon="inline-start" />
-        このコード付与を削除
+        {t('このコード付与を削除')}
       </Button>
     </div>
   )

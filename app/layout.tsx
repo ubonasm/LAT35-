@@ -3,7 +3,9 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Kotoba Lens — 質的データ分析ワークベンチ',
+  title: 'LAT35++ v0.1 — 質的データ分析ワークベンチ',
+  authors: [{ name: 'Masanobu Sakamoto' }],
+  applicationName: 'LAT35++',
   description:
     '発言記録にコードと「度合い」を付し、KWIC検索や語・コードの類似度（Jaccard・TF-IDF・コサイン）を可視化する質的研究用アプリ',
   generator: 'v0.app',

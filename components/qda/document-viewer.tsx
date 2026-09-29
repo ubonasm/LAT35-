@@ -5,6 +5,7 @@ import { useActiveProject, useProjects, useUI } from '@/lib/qda/store'
 import { DEGREE_WIDTH, type Code, type Coding, type TextPos, type Utterance } from '@/lib/qda/types'
 import { cn } from '@/lib/utils'
 import { CodingToolbar, type PendingSelection } from './coding-toolbar'
+import { useT } from '@/lib/i18n'
 
 const LANE_W = 11
 
@@ -45,6 +46,7 @@ export function DocumentViewer() {
   const project = useActiveProject()
   const activeDocId = useProjects((s) => s.activeDocId)
   const { selectedCodingId, selectCoding, jump, focusCodeId } = useUI()
+  const t = useT()
   const [pending, setPending] = useState<PendingSelection | null>(null)
   const [flashU, setFlashU] = useState<number | null>(null)
   const rowRefs = useRef(new Map<number, HTMLElement>())
@@ -95,7 +97,7 @@ export function DocumentViewer() {
   if (!doc) {
     return (
       <div className="flex flex-1 items-center justify-center p-8 text-center text-sm leading-relaxed text-muted-foreground">
-        左の「文書」から文書を選ぶか、CSV/TXTを読み込んでください。
+        {t('左の「文書」から文書を選ぶか、CSV/TXTを読み込んでください。')}
       </div>
     )
   }
@@ -105,11 +107,11 @@ export function DocumentViewer() {
       <div className="flex items-baseline justify-between gap-3 border-b border-border px-4 py-2">
         <h2 className="truncate text-sm font-medium">{doc.name}</h2>
         <p className="shrink-0 font-mono text-xs text-muted-foreground">
-          {doc.utterances.length}発言 ・ {codings.length}箇所
+          {t('{u}発言 ・ {c}箇所', { u: doc.utterances.length, c: codings.length })}
         </p>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto" onMouseUp={onMouseUp}>
-        <div role="table" aria-label={`${doc.name}の発言`} className="flex flex-col pb-24">
+        <div role="table" aria-label={t('{name}の発言', { name: doc.name })} className="flex flex-col pb-24">
           {doc.utterances.map((u, i) => (
             <Row
               key={u.id}
@@ -164,6 +166,7 @@ function Row({
   onSelectCoding: (id: string | null) => void
   onCodeRow: (i: number, e: React.MouseEvent) => void
 }) {
+  const t = useT()
   const lanes: (Coding | null)[] = Array.from({ length: laneCount }, () => null)
   for (const c of codings) lanes[lane.get(c.id) ?? 0] = c
 
@@ -187,8 +190,8 @@ function Row({
               key={l}
               type="button"
               onClick={() => onSelectCoding(c.id)}
-              aria-label={`${code.name}・度合い${c.degree}（${deg?.label ?? ''}）`}
-              title={`${code.name}\n度合い${c.degree}：${deg?.label ?? ''}`}
+              aria-label={t('{code}・度合い{n}（{label}）', { code: code.name, n: c.degree, label: t(deg?.label ?? '') })}
+              title={t('{code}\n度合い{n}：{label}', { code: code.name, n: c.degree, label: t(deg?.label ?? '') })}
               className={cn('flex justify-center', isStart && 'pt-1.5', isEnd && 'pb-1.5')}
               style={{ width: LANE_W }}
             >
@@ -210,7 +213,7 @@ function Row({
           type="button"
           onClick={(e) => onCodeRow(index, e)}
           className="rounded-sm px-1 font-mono text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
-          title="この発言全体にコードを付す"
+          title={t('この発言全体にコードを付す')}
         >
           {utterance.number}
         </button>

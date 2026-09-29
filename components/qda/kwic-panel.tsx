@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { useActiveProject, useProjects, useUI } from '@/lib/qda/store'
 import type { Degree } from '@/lib/qda/types'
+import { useT } from '@/lib/i18n'
 import { NativeSelect } from './native-select'
 
 interface Hit {
@@ -36,6 +37,7 @@ export function KwicPanel() {
   const [codeId, setCodeId] = useState('')
   const [degree, setDegree] = useState<Degree>(2)
   const [msg, setMsg] = useState<string | null>(null)
+  const t = useT()
 
   const { hits, error } = useMemo(() => {
     if (!project || !query) return { hits: [] as Hit[], error: null }
@@ -43,7 +45,7 @@ export function KwicPanel() {
     try {
       re = new RegExp(regex ? query : query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')
     } catch {
-      return { hits: [] as Hit[], error: '正規表現が正しくありません' }
+      return { hits: [] as Hit[], error: 'invalid' }
     }
     const out: Hit[] = []
     for (const d of project.documents) {
@@ -80,7 +82,7 @@ export function KwicPanel() {
     for (const h of targets) {
       addCoding({ docId: h.docId, codeId, degree, start: { u: h.u, o: h.start }, end: { u: h.u, o: h.end } })
     }
-    setMsg(`${targets.length}件にコードを付しました`)
+    setMsg(t('{n}件にコードを付しました', { n: targets.length }))
     setChecked(new Set())
   }
 
@@ -98,22 +100,22 @@ export function KwicPanel() {
         }}
       >
         <div className="flex gap-1">
-          <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="語を検索（例：やめて）" aria-label="検索語" />
-          <Button type="submit" size="icon" aria-label="検索">
+          <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder={t('語を検索（例：やめて）')} aria-label={t('検索語')} />
+          <Button type="submit" size="icon" aria-label={t('検索')}>
             <Search />
           </Button>
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <NativeSelect aria-label="範囲" className="h-7 text-xs" value={scope} onChange={(e) => setScope(e.target.value as 'doc' | 'all')}>
-            <option value="all">全文書</option>
-            <option value="doc">表示中の文書</option>
+          <NativeSelect aria-label={t('範囲')} className="h-7 text-xs" value={scope} onChange={(e) => setScope(e.target.value as 'doc' | 'all')}>
+            <option value="all">{t('全文書')}</option>
+            <option value="doc">{t('表示中の文書')}</option>
           </NativeSelect>
           <label className="flex items-center gap-1.5">
             <Checkbox checked={regex} onCheckedChange={(v) => setRegex(!!v)} />
-            正規表現
+            {t('正規表現')}
           </label>
           <label className="flex items-center gap-1.5">
-            前後
+            {t('前後')}
             <Input
               type="number"
               min={4}
@@ -122,23 +124,21 @@ export function KwicPanel() {
               onChange={(e) => setCtx(Math.max(4, Math.min(60, Number(e.target.value) || 18)))}
               className="h-7 w-14 text-xs"
             />
-            字
+            {t('字')}
           </label>
         </div>
       </form>
 
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && <p className="text-xs text-destructive">{t('正規表現が正しくありません')}</p>}
       {query && !error && (
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <label className="flex items-center gap-1.5">
             <Checkbox
               checked={allChecked}
               onCheckedChange={(v) => setChecked(v ? new Set(hits.map((h) => h.key)) : new Set())}
-              aria-label="すべて選択"
+              aria-label={t('すべて選択')}
             />
-            {'「'}
-            {query}
-            {'」'} {hits.length}件
+            {t('「{q}」 {n}件', { q: query, n: hits.length })}
           </label>
         </div>
       )}
@@ -148,7 +148,7 @@ export function KwicPanel() {
           <li key={h.key} className="flex items-center gap-1.5 border-b border-border/60 px-1.5 py-1 last:border-b-0">
             <Checkbox
               checked={checked.has(h.key)}
-              aria-label={`${h.number}を選択`}
+              aria-label={t('{n}を選択', { n: h.number })}
               onCheckedChange={(v) =>
                 setChecked((prev) => {
                   const n = new Set(prev)
@@ -180,28 +180,30 @@ export function KwicPanel() {
         ))}
         {!query && (
           <li className="p-3 text-xs leading-relaxed text-muted-foreground">
-            語を検索すると、前後の文脈とともに一覧表示（KWIC）します。行をクリックすると本文へ移動、チェックした箇所にまとめてコードを付せます。
+            {t('語を検索すると、前後の文脈とともに一覧表示（KWIC）します。行をクリックすると本文へ移動、チェックした箇所にまとめてコードを付せます。')}
           </li>
         )}
       </ol>
 
       {checked.size > 0 && (
         <div className="flex flex-wrap items-center gap-1.5 rounded-md bg-secondary p-2">
-          <NativeSelect aria-label="付すコード" className="h-7 min-w-0 flex-1 text-xs" value={codeId} onChange={(e) => setCodeId(e.target.value)}>
-            <option value="">コードを選択</option>
+          <NativeSelect aria-label={t('付すコード')} className="h-7 min-w-0 flex-1 text-xs" value={codeId} onChange={(e) => setCodeId(e.target.value)}>
+            <option value="">{t('コードを選択')}</option>
             {project.codes.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </NativeSelect>
-          <NativeSelect aria-label="度合い" className="h-7 text-xs" value={degree} onChange={(e) => setDegree(Number(e.target.value) as Degree)}>
-            <option value={1}>度合い1</option>
-            <option value={2}>度合い2</option>
-            <option value={3}>度合い3</option>
+          <NativeSelect aria-label={t('度合い')} className="h-7 text-xs" value={degree} onChange={(e) => setDegree(Number(e.target.value) as Degree)}>
+            {[1, 2, 3].map((n) => (
+              <option key={n} value={n}>
+                {t('度合い{n}', { n })}
+              </option>
+            ))}
           </NativeSelect>
           <Button size="sm" disabled={!codeId} onClick={applyCodes}>
-            {checked.size}件に付す
+            {t('{n}件に付す', { n: checked.size })}
           </Button>
         </div>
       )}

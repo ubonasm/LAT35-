@@ -3,7 +3,7 @@ setlocal
 cd /d "%~dp0"
 
 echo ============================================
-echo  Kotoba Lens - first time setup
+echo  LAT35++ v0.1 - first time setup
 echo ============================================
 
 where node >nul 2>nul

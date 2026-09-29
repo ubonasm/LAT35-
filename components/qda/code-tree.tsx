@@ -7,6 +7,7 @@ import { descendantIds, isCategory, rootCodes } from '@/lib/qda/hierarchy'
 import { useActiveProject, useUI } from '@/lib/qda/store'
 import type { Code, CodeKind, Project } from '@/lib/qda/types'
 import { cn } from '@/lib/utils'
+import { useT } from '@/lib/i18n'
 import { CategoryReport } from './category-report'
 import { CodeDialog } from './code-dialog'
 
@@ -21,6 +22,7 @@ export function CodeTree() {
   const project = useActiveProject()
   const [dialog, setDialog] = useState<DialogState>({ open: false, codeId: null })
   const [report, setReport] = useState(false)
+  const t = useT()
   if (!project) return null
   const roots = rootCodes(project.codes)
 
@@ -28,20 +30,20 @@ export function CodeTree() {
     <section className="flex flex-col gap-2" aria-labelledby="code-heading">
       <div className="flex items-center justify-between gap-1">
         <h2 id="code-heading" className="text-xs font-medium tracking-wide text-muted-foreground">
-          コードシステム
+          {t('コードシステム')}
         </h2>
         <div className="flex">
           <Button size="xs" variant="ghost" onClick={() => setDialog({ open: true, codeId: null, kind: 'category' })}>
             <Plus data-icon="inline-start" />
-            カテゴリ
+            {t('カテゴリ')}
           </Button>
           <Button size="xs" variant="ghost" onClick={() => setDialog({ open: true, codeId: null, kind: 'code' })}>
             <Plus data-icon="inline-start" />
-            コード
+            {t('コード')}
           </Button>
         </div>
       </div>
-      <ul role="tree" aria-label="コードシステム" className="flex flex-col">
+      <ul role="tree" aria-label={t('コードシステム')} className="flex flex-col">
         {roots.map((c) => (
           <CodeNode
             key={c.id}
@@ -55,13 +57,13 @@ export function CodeTree() {
       </ul>
       {project.codes.length === 0 && (
         <p className="text-xs leading-relaxed text-muted-foreground">
-          コードを定義するか、本文を選択してその場で新しいコードを作成できます。
+          {t('コードを定義するか、本文を選択してその場で新しいコードを作成できます。')}
         </p>
       )}
       {project.codes.length > 0 && (
         <Button size="sm" variant="outline" className="mt-1" onClick={() => setReport(true)}>
           <FileText data-icon="inline-start" />
-          カテゴリ・コード一覧作成
+          {t('カテゴリ・コード一覧作成')}
         </Button>
       )}
       <CodeDialog
@@ -90,6 +92,7 @@ function CodeNode({
   onAddChild: (id: string) => void
 }) {
   const { focusCodeId, setFocusCode, setPanelTab } = useUI()
+  const t = useT()
   const children = project.codes.filter((c) => c.parentId === code.id)
   const category = isCategory(code)
   const scope = category ? descendantIds(project.codes, code.id) : new Set([code.id])
@@ -119,10 +122,10 @@ function CodeNode({
             <span aria-hidden className="size-2.5 shrink-0 rounded-sm" style={{ backgroundColor: code.color }} />
           )}
           <span className="truncate">{code.name}</span>
-          {category && <span className="sr-only">（カテゴリ）</span>}
+          {category && <span className="sr-only">{t('（カテゴリ）')}</span>}
           <span
             className="ml-auto flex items-center gap-1 font-mono text-xs font-normal text-muted-foreground"
-            title={category ? '含むコードの付与件数（度合い1/2/3）' : '度合い1/2/3の件数'}
+            title={t(category ? '含むコードの付与件数（度合い1/2/3）' : '度合い1/2/3の件数')}
           >
             {total > 0 && (
               <span className="flex h-3 items-stretch gap-px" aria-hidden>
@@ -142,7 +145,7 @@ function CodeNode({
           size="icon-xs"
           variant="ghost"
           className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-          aria-label={`${code.name}に下位コードを追加`}
+          aria-label={t('{name}に下位コードを追加', { name: code.name })}
           onClick={() => onAddChild(code.id)}
         >
           <Plus />
@@ -151,7 +154,7 @@ function CodeNode({
           size="icon-xs"
           variant="ghost"
           className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-          aria-label={`${code.name}を編集`}
+          aria-label={t('{name}を編集', { name: code.name })}
           onClick={() => onEdit(code.id)}
         >
           <Pencil />

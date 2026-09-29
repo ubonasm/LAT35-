@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { blankCode, useActiveProject, useProjects, useUI } from '@/lib/qda/store'
 import { DEGREE_WIDTH, type Degree, type TextPos } from '@/lib/qda/types'
 import { cn } from '@/lib/utils'
+import { useT } from '@/lib/i18n'
 
 export interface PendingSelection {
   start: TextPos
@@ -23,6 +24,7 @@ export function CodingToolbar({ pending, onClose }: { pending: PendingSelection;
   const [codeId, setCodeId] = useState<string | null>(focusCodeId ?? project.codes[0]?.id ?? null)
   const [degree, setDegree] = useState<Degree>(2)
   const [filter, setFilter] = useState('')
+  const t = useT()
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
@@ -48,7 +50,7 @@ export function CodingToolbar({ pending, onClose }: { pending: PendingSelection;
   return (
     <div
       role="dialog"
-      aria-label="コードを付す"
+      aria-label={t('コードを付す')}
       className="fixed z-40 flex flex-col gap-2 rounded-lg border border-border bg-popover p-2 text-popover-foreground shadow-lg"
       style={{ left, top: Math.max(8, top), width }}
       onMouseDown={(e) => e.stopPropagation()}
@@ -65,7 +67,7 @@ export function CodingToolbar({ pending, onClose }: { pending: PendingSelection;
             {pending.end.u !== pending.start.u && `–${pending.end.u + 1}`}
           </span>
         </p>
-        <Button size="icon-xs" variant="ghost" aria-label="閉じる" onClick={onClose}>
+        <Button size="icon-xs" variant="ghost" aria-label={t('閉じる')} onClick={onClose}>
           <X />
         </Button>
       </div>
@@ -82,11 +84,11 @@ export function CodingToolbar({ pending, onClose }: { pending: PendingSelection;
             apply(id)
           } else if (list[0]) apply(list[0].id)
         }}
-        placeholder="コードを検索／新規作成"
+        placeholder={t('コードを検索／新規作成')}
         className="h-7 text-sm"
       />
 
-      <ul className="flex max-h-40 flex-col overflow-y-auto" role="listbox" aria-label="コード">
+      <ul className="flex max-h-40 flex-col overflow-y-auto" role="listbox" aria-label={t('コード')}>
         {list.map((c) => (
           <li key={c.id}>
             <button
@@ -113,16 +115,14 @@ export function CodingToolbar({ pending, onClose }: { pending: PendingSelection;
               className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-sm text-primary hover:bg-muted"
             >
               <Plus className="size-3.5" aria-hidden />
-              {'「'}
-              {filter.trim()}
-              {'」を作成して付す'}
+              {t('「{name}」を作成して付す', { name: filter.trim() })}
             </button>
           </li>
         )}
       </ul>
 
       <fieldset className="flex flex-col gap-1">
-        <legend className="mb-1 text-xs text-muted-foreground">度合い</legend>
+        <legend className="mb-1 text-xs text-muted-foreground">{t('度合い')}</legend>
         <div className="grid grid-cols-3 gap-1">
           {([1, 2, 3] as Degree[]).map((d) => {
             const def = code?.degrees.find((x) => x.level === d)
@@ -140,7 +140,7 @@ export function CodingToolbar({ pending, onClose }: { pending: PendingSelection;
                   className="h-4 rounded-full"
                   style={{ width: DEGREE_WIDTH[d], backgroundColor: code?.color ?? 'currentColor' }}
                 />
-                <span className="truncate">{def?.label ?? d}</span>
+                <span className="truncate">{def ? t(def.label) : d}</span>
               </button>
             )
           })}
@@ -148,7 +148,7 @@ export function CodingToolbar({ pending, onClose }: { pending: PendingSelection;
       </fieldset>
 
       <Button size="sm" disabled={!codeId} onClick={() => codeId && apply(codeId)}>
-        コードを付す
+        {t('コードを付す')}
       </Button>
     </div>
   )
