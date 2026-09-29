@@ -103,6 +103,9 @@ node -v
 
 画面左上のプロジェクト名をクリックして、次のいずれかを選びます。
 
+<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015513" src="https://github.com/user-attachments/assets/d5c8f568-7c1f-4ca3-a279-ce01ba688ed9" />
+
+
 - **新しいプロジェクト**：名前を付けて作成
 - **プロジェクトを読み込む**：保存しておいた `.qda.json` ファイルを開く
 
@@ -140,11 +143,19 @@ node -v
 
 コードシステムの **「＋コード」** から作成します。
 
+<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015614" src="https://github.com/user-attachments/assets/3b5fdda9-e3ee-442a-bb4e-54c41cdd86bd" />
+
+<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015638" src="https://github.com/user-attachments/assets/5d6ea85c-314d-40dc-bd9b-93a0bfd1844d" />
+
+
 - **コード名・定義**：コードを付す基準や、含む／含まない例
 - **色**：縦線やグラフで使う色
 - **上位カテゴリー**：このコードを包括するカテゴリやコード（一覧では `カテ` / `コド` で区別されます）
 - **度合い（3段階）**：それぞれの段階の意味（例：1＝遊びの中、2＝やや意図あり、3＝切実）
 - **自動コーディング用の語**：読点・カンマ区切りで入力すると、その語を含む発言に自動でコードを付けられます
+
+<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015608" src="https://github.com/user-attachments/assets/3c666798-40b1-4781-b0f9-d0b472ee32eb" />
+
 
 **「＋カテゴリ」** からは、複数のコードを包括する上位概念を作れます。カテゴリを選択すると、説明文・含むコード・該当する発言が右側に表示されます。
 
@@ -154,9 +165,17 @@ node -v
 2. 上部のツールバーでコードと度合いを選び、付与します。
 3. コードを付した箇所には、本文の左側に **縦線** が引かれます。度合いが高いほど線が太くなります。
 
+<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 020424" src="https://github.com/user-attachments/assets/02ea8905-db72-4bb9-9b78-b3b8dcbac10f" />
+
+
 ### 5. KWIC検索
 
 検索パネルに語を入力すると、その語の前後の文脈を一覧表示します（KH Coder の KWIC コンコーダンスと同様）。結果を見ながらコードの定義を見直すのに便利です。
+
+<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015659" src="https://github.com/user-attachments/assets/93f3a233-419f-4178-887c-175779bd8086" />
+
+<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015717" src="https://github.com/user-attachments/assets/3858c7fe-cbe8-4ebd-80b0-1a9135be1a38" />
+
 
 ### 6. 可視化する
 
@@ -176,11 +195,23 @@ node -v
 
 **色の設定**で **「なし」** を選ぶと、白黒（グレースケール）で表示されます。論文や報告書に載せるときに便利です。
 
+<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015809" src="https://github.com/user-attachments/assets/833b6bc1-aff6-4898-9945-0422cd02b22f" />
+
+<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015821" src="https://github.com/user-attachments/assets/49756a1e-ebd8-4954-9d6d-559edaa89de7" />
+
+<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015826" src="https://github.com/user-attachments/assets/0f8201b7-549f-4b4c-8141-7e1bf2ebf0ec" />
+
+<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015915" src="https://github.com/user-attachments/assets/792703f9-4b3f-44e7-bab8-239dd782792f" />
+
+
 各図の右上から **PNG / JPG / PDF / SVG** で保存できます。SVG はベクター形式なので、Illustrator・Inkscape・PowerPoint などで拡大しても粗くならず、文字や線を後から編集できます。
 
 ### 7. 語の分割を直す（ユーザー辞書）
 
 「日本人」が「日本」「人」に分かれてしまうなど、語の分割のされ方が意図と違う場合は、可視化画面の **「語の取り扱い（辞書）」** で語を登録してください。登録はプロジェクトごとに保存されます。
+
+<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015929" src="https://github.com/user-attachments/assets/42dff06e-9ad2-4b6e-9d81-fb0739f719bd" />
+
 
 ### 8. カテゴリ・コード一覧表を作る
 
@@ -191,6 +222,9 @@ node -v
 用紙サイズ（A4 / Letter）を選び、**「印刷／PDF」** を押します。PDF にする場合は、印刷画面の送信先で「PDF に保存」を選んでください。用紙は横向き、余白は上下左右 20mm に設定されています。
 
 **「CSV」** または **「Excel (xlsx)」** を押すと、同じ内容を表データとして保存できます（列：カテゴリ ／ カテゴリ定義 ／ コード ／ 発言番号 ／ 付された文章 ／ 度合い。文書が複数ある場合は「文書」列も加わります）。CSV は Excel で開いても文字化けしない UTF-8（BOM 付き）で保存されます。
+
+<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 020702" src="https://github.com/user-attachments/assets/519f2c6c-f3a4-44c9-ba86-989a5f1e87bc" />
+
 
 ---
 
