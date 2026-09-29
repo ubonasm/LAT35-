@@ -1,4 +1,4 @@
-<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015915" src="https://github.com/user-attachments/assets/52e7fe27-794e-4f81-b904-eb703bb5dccc" /># LAT35++ v0.1
+# LAT35++ v0.1
 
 授業分析のためのコーディング＆分析ツール
 
@@ -170,7 +170,7 @@ node -v
 <img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015821" src="https://github.com/user-attachments/assets/368e688b-0c31-4e9a-b816-e46e3a8d05dc" />
 <img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015826" src="https://github.com/user-attachments/assets/96d9784f-317a-45d9-8cdc-43d18eb2795e" />
 <img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015915" src="https://github.com/user-attachments/assets/9966ad36-4d66-4cd7-8015-b4ebfdfb0d37" />
-
+<img width="1920" height="1232" alt="スクリーンショット 2026-09-29 015915" src="https://github.com/user-attachments/assets/52e7fe27-794e-4f81-b904-eb703bb5dccc" />
 
 - **対象の絞り込み**：文書、発言者、品詞、最小頻度、発言番号の区間
 - **注目語**：分析に含めたい語を指定
